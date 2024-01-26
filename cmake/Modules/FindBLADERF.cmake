@@ -23,6 +23,7 @@ FIND_LIBRARY(BLADERF_LIBRARY
   /usr/lib/x86_64-linux-gnu/
   /usr/lib
   /usr/local/lib
+  /usr/lib/arm-linux-gnueabihf
   NO_DEFAULT_PATH
 )
 
