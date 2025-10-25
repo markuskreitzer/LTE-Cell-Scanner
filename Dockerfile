@@ -14,7 +14,6 @@ RUN apt-get update && \
       pkg-config \
       git \
       libboost-all-dev \
-      libitpp-dev \
       libfftw3-dev \
       liblapack-dev \
       libblas-dev \
@@ -26,6 +25,28 @@ RUN apt-get update && \
       # Optional OpenCL headers (disable via -DUSE_OPENCL=0 if undesired)
       ocl-icd-opencl-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Install ITPP from source for arm64 compatibility
+RUN if [ "$(dpkg --print-architecture)" = "arm64" ]; then \
+      apt-get update && \
+      apt-get install -y --no-install-recommends \
+        libfftw3-dev \
+        liblapack-dev \
+        libblas-dev \
+        && \
+      git clone https://github.com/ghaerr/itpp.git /tmp/itpp && \
+      cd /tmp/itpp && \
+      mkdir build && cd build && \
+      cmake .. -DCMAKE_INSTALL_PREFIX=/usr && \
+      make -j$(nproc) && \
+      make install && \
+      ldconfig && \
+      cd / && rm -rf /tmp/itpp; \
+    else \
+      apt-get update && \
+      apt-get install -y --no-install-recommends libitpp-dev && \
+      rm -rf /var/lib/apt/lists/*; \
+    fi
 
 WORKDIR /app
 
