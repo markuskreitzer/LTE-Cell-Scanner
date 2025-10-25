@@ -42,6 +42,91 @@ make -j
   - If `hackrf_info` works but the app reports "HackRF not found", replug USB or try another cable/port.
   - If you installed Homebrew to a non-default prefix, ensure headers and libs are under standard paths; CMake searches common Homebrew/MacPorts locations.
 
+### Docker (Linux build environment)
+
+The Dockerfile provides a reproducible Ubuntu 22.04 build environment with HackRF support enabled by default.
+
+#### Quick Start
+```bash
+# Build the Docker image (HackRF enabled by default)
+docker build -t lte-cell-scanner .
+
+# Run with HackRF hardware access
+docker run --rm --device=/dev/bus/usb:/dev/bus/usb lte-cell-scanner CellSearch -s 739000000 -v
+```
+
+#### Build Options
+You can customize which SDR backends to include during build:
+```bash
+# Build with different SDR support
+docker build -t lte-cell-scanner \
+  --build-arg USE_HACKRF=1 \
+  --build-arg USE_RTLSDR=0 \
+  --build-arg USE_BLADERF=0 \
+  --build-arg USE_OPENCL=0 \
+  .
+```
+
+#### Usage Examples
+
+**Interactive shell:**
+```bash
+docker run --rm -it lte-cell-scanner bash
+```
+
+**With HackRF hardware (Linux host):**
+```bash
+# Basic hardware access
+docker run --rm --device=/dev/bus/usb:/dev/bus/usb lte-cell-scanner CellSearch -h
+
+# With additional privileges if needed
+docker run --rm -it \
+  --device=/dev/bus/usb:/dev/bus/usb \
+  --group-add plugdev \
+  lte-cell-scanner CellSearch -s 739000000 -v
+```
+
+**Development workflow with bind mount:**
+```bash
+# Mount source code for live development
+docker run --rm -it \
+  -v "$PWD":/app \
+  -w /app \
+  lte-cell-scanner bash -lc \
+  'rm -rf build && mkdir build && cd build && cmake -DUSE_HACKRF=1 .. && make -j && ./src/CellSearch -h'
+```
+
+**Verify HackRF detection:**
+```bash
+docker run --rm --device=/dev/bus/usb:/dev/bus/usb lte-cell-scanner hackrf_info
+```
+
+#### Hardware Requirements
+- Linux host (for USB device passthrough)
+- HackRF One or other compatible HackRF device
+- USB cable and proper permissions
+
+#### Troubleshooting
+- If `hackrf_info` shows "No HackRF boards found", check USB connections and permissions
+- Ensure your user is in the `plugdev` group on the host
+- Try adding `--privileged` flag if device access is still problematic
+- The container includes all HackRF utilities (`hackrf_info`, `hackrf_transfer`, etc.)
+
+#### Pre-built Docker Images
+Pre-built images are available from GitHub Container Registry:
+```bash
+# Latest stable release
+docker pull ghcr.io/markuskreitzer/LTE-Cell-Scanner:latest
+
+# Specific version
+docker pull ghcr.io/markuskreitzer/LTE-Cell-Scanner:v1.1.0
+
+# Latest nightly build
+docker pull ghcr.io/markuskreitzer/LTE-Cell-Scanner:latest-nightly
+```
+
+Images support both `linux/amd64` and `linux/arm64` architectures.
+
 ## Usage
 - CellSearch
 ```

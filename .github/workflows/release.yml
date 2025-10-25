@@ -1,0 +1,86 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Get version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+        echo "Tag version: ${VERSION}"
+
+    - name: Get version from CMakeLists.txt
+      id: cmake-version
+      run: |
+        MAJOR=$(grep 'SET(.*_MAJOR_VERSION' CMakeLists.txt | grep -o '[0-9]\+')
+        MINOR=$(grep 'SET(.*_MINOR_VERSION' CMakeLists.txt | grep -o '[0-9]\+')
+        PATCH=$(grep 'SET(.*_PATCH_LEVEL' CMakeLists.txt | grep -o '[0-9]\+')
+        CMAKE_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+        echo "CMAKE_VERSION=${CMAKE_VERSION}" >> $GITHUB_OUTPUT
+        echo "CMake version: ${CMAKE_VERSION}"
+
+    - name: Validate version match
+      run: |
+        if [ "${{ steps.version.outputs.VERSION }}" != "${{ steps.cmake-version.outputs.CMAKE_VERSION }}" ]; then
+          echo "Error: Tag version (${{ steps.version.outputs.VERSION }}) does not match CMakeLists.txt version (${{ steps.cmake-version.outputs.CMAKE_VERSION }})"
+          exit 1
+        fi
+        echo "Version validation passed!"
+
+    - name: Generate changelog
+      id: changelog
+      run: |
+        # Get previous tag
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+        if [ -n "$PREVIOUS_TAG" ]; then
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD)
+        else
+          CHANGELOG=$(git log --pretty=format:"- %s (%h)")
+        fi
+        
+        echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## LTE-Cell-Scanner v${{ steps.version.outputs.VERSION }}
+          
+          ### Docker Images
+          - `ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}`
+          - `ghcr.io/${{ github.repository }}:latest`
+          
+          ### Changes
+          ${{ steps.changelog.outputs.CHANGELOG }}
+          
+          ### Installation
+          ```bash
+          # Pull the image
+          docker pull ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }}
+          
+          # Run with HackRF
+          docker run --rm --device=/dev/bus/usb:/dev/bus/usb ghcr.io/${{ github.repository }}:${{ steps.version.outputs.VERSION }} CellSearch -s 739000000 -v
+          ```
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
