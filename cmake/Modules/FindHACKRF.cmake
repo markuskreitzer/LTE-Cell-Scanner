@@ -11,21 +11,36 @@
 
 FIND_PATH(HACKRF_INCLUDE_DIR hackrf.h
   ${HACKRF_DIR}/include
+  # Homebrew (Apple Silicon and Intel)
+  /opt/homebrew/include/libhackrf
+  /opt/homebrew/include
+  /opt/homebrew/Cellar/hackrf/*/include
   /usr/local/include/libhackrf
+  /usr/local/opt/hackrf/include/libhackrf
+  # MacPorts
+  /opt/local/include/libhackrf
+  # Linux common
   /usr/include/libhackrf
 )
 
 FIND_LIBRARY(HACKRF_LIBRARY
   NAMES hackrf
-  PATHS ${HACKRF_DIR}/libs
-  "${HACKRF_DIR}\\win32\\lib"
-  /usr/pkgs64/lib
-  /usr/lib/aarch64-linux-gnu
-  /usr/lib64
-  /usr/lib
-  /usr/local/lib
-  /usr/lib/x86_64-linux-gnu
-  /usr/lib/arm-linux-gnueabihf
+  PATHS
+    ${HACKRF_DIR}/libs
+    "${HACKRF_DIR}\\win32\\lib"
+    # Homebrew (Apple Silicon and Intel)
+    /opt/homebrew/lib
+    /opt/homebrew/Cellar/hackrf/*/lib
+    /usr/local/lib
+    /usr/local/opt/hackrf/lib
+    # MacPorts
+    /opt/local/lib
+    # Linux common
+    /usr/pkgs64/lib
+    /usr/lib64
+    /usr/lib
+    /usr/lib/x86_64-linux-gnu
+    /usr/lib/arm-linux-gnueabihf
   NO_DEFAULT_PATH
 )
 
@@ -53,4 +68,3 @@ MARK_AS_ADVANCED(
   HACKRF_LIBRARY
   HACKRF_INCLUDE_DIR
 )
-

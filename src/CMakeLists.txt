@@ -1,7 +1,7 @@
 # Create a library of all the shared functions.
 add_library(LTE_MISC capbuf.cpp constants.cpp itpp_ext.cpp macros.cpp searcher.cpp common.cpp dsp.cpp lte_lib.cpp from_osmocom.cpp)
 
-SET (common_link_libs ${Boost_LIBRARIES} ${Boost_THREAD_LIBRARY} ${LAPACK_LIBRARIES} ${FFTW_LIBRARIES} ${CURSES_LIBRARIES})
+SET (common_link_libs ${Boost_LIBRARIES} ${LAPACK_LIBRARIES} ${FFTW_LIBRARIES} ${CURSES_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 IF ( OPENCL_FOUND )
   LIST(APPEND common_link_libs ${OPENCL_LIBRARIES})
@@ -22,14 +22,12 @@ ENDIF ( BLADERF_FOUND )
 # Create the cell search executable
 ADD_EXECUTABLE (CellSearch CellSearch.cpp)
 TARGET_LINK_LIBRARIES (CellSearch general LTE_MISC)
-TARGET_LINK_LIBRARIES (CellSearch debug itpp_debug ${common_link_libs})
-TARGET_LINK_LIBRARIES (CellSearch optimized itpp ${common_link_libs})
+TARGET_LINK_LIBRARIES (CellSearch ${ITPP_LIBRARIES} ${Boost_LIBRARIES} ${common_link_libs})
 
 # Create the cell tracker
 ADD_EXECUTABLE (LTE-Tracker LTE-Tracker.cpp producer_thread.cpp tracker_thread.cpp searcher_thread.cpp display_thread.cpp)
 TARGET_LINK_LIBRARIES (LTE-Tracker general LTE_MISC)
-TARGET_LINK_LIBRARIES (LTE-Tracker debug itpp_debug ${common_link_libs})
-TARGET_LINK_LIBRARIES (LTE-Tracker optimized itpp ${common_link_libs})
+TARGET_LINK_LIBRARIES (LTE-Tracker ${ITPP_LIBRARIES} ${Boost_LIBRARIES} ${common_link_libs})
 
 # Code use to test whether the rtl_sdr dongle is dropping samples
 # or not.
@@ -51,4 +49,3 @@ TARGET_LINK_LIBRARIES (LTE-Tracker optimized itpp ${common_link_libs})
 #SET_TESTS_PROPERTIES(FullTest PROPERTIES PASS_REGULAR_EXPRESSION cell.ID..271)
 
 INSTALL( TARGETS CellSearch LTE-Tracker DESTINATION bin )
-

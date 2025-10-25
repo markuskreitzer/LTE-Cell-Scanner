@@ -23,6 +23,25 @@ By default above builds for rtlsdr. Following arguments could be added at the en
 -DUSE_HACKRF=1    -- build for HackRF
 -DUSE_OPENCL=0    -- disable OpenCL (See notes in later chapter)
 ```
+
+### macOS (Homebrew) Quick Start
+- Prereqs: `brew install hackrf itpp fftw boost lapack`
+- Configure and build with HackRF support:
+```
+mkdir build && cd build
+cmake -DUSE_HACKRF=1 ..
+make -j
+```
+- Verify HackRF is visible: `hackrf_info` should list your board.
+- Run a scan (example at 739 MHz):
+```
+./src/CellSearch -s 739000000 -v
+```
+- Notes
+  - The build uses a consistent C++ standard across platforms and auto-detects HackRF via CMake.
+  - If `hackrf_info` works but the app reports "HackRF not found", replug USB or try another cable/port.
+  - If you installed Homebrew to a non-default prefix, ensure headers and libs are under standard paths; CMake searches common Homebrew/MacPorts locations.
+
 ## Usage
 - CellSearch
 ```

@@ -11,6 +11,8 @@
 
 FIND_PATH(ITPP_INCLUDE_DIR itpp/itbase.h
   ${ITPP_DIR}/include
+  /opt/homebrew/include
+  /opt/homebrew/Cellar/itpp/*/include
   /usr/pkgs64/include
   /usr/include
   /usr/local/include
@@ -20,6 +22,8 @@ FIND_LIBRARY(ITPP_LIBRARY_NORMAL
   NAMES itpp
   PATHS ${ITPP_DIR}/libs
   "${ITPP_DIR}\\win32\\lib"
+  /opt/homebrew/lib
+  /opt/homebrew/Cellar/itpp/*/lib
   /usr/pkgs64/lib
   /usr/lib64
   /usr/lib/x86_64-linux-gnu
@@ -34,6 +38,8 @@ FIND_LIBRARY(ITPP_LIBRARY_DEBUG
   NAMES itpp_debug
   PATHS ${ITPP_DIR}/libs
   "${ITPP_DIR}\\win32\\lib"
+  /opt/homebrew/lib
+  /opt/homebrew/Cellar/itpp/*/lib
   /usr/pkgs64/lib
   /usr/lib64
   /usr/lib

@@ -11,6 +11,8 @@
 
 FIND_PATH(FFTW_INCLUDE_DIR fftw3.h
   ${FFTW_DIR}/include
+  /opt/homebrew/include
+  /opt/homebrew/Cellar/fftw/*/include
   /usr/pkgs64/include
   /usr/include
   /usr/local/include
@@ -20,6 +22,8 @@ FIND_LIBRARY(FFTW_LIBRARY
   NAMES fftw3
   PATHS ${FFTW_DIR}/libs
   "${FFTW_DIR}\\win32\\lib"
+  /opt/homebrew/lib
+  /opt/homebrew/Cellar/fftw/*/lib
   /usr/lib/x86_64-linux-gnu
   /usr/lib/aarch64-linux-gnu
   /usr/pkgs64/lib
